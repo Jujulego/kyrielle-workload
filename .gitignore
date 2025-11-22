@@ -1,0 +1,19 @@
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Generated files
+.vite
+.vitest
+coverage
+dist
+eslint-results.sarif
+junit-report.xml
+
+*.log
+*.pid

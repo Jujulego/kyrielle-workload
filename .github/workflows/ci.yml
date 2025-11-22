@@ -1,0 +1,225 @@
+name: 'CI'
+
+on:
+  push:
+    branches: [ latest, next ]
+
+  pull_request:
+    branches: [ latest, next ]
+
+concurrency:
+  group: javascript-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 24.x
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Build
+        run: yarn build
+
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: build
+          path: dist
+
+  lint:
+    name: 'Lint'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 24.x
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Lint
+        continue-on-error: true
+        run: yarn lint -f @microsoft/sarif -o eslint-results.sarif
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v4.30.9
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
+
+  tests:
+    name: 'Tests'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 24.x
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn test --coverage
+
+      - name: Check tests typings
+        run: yarn test:types
+
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          flags: unit
+          use_oidc: true
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: junit-report.xml
+          flags: unit
+          use_oidc: true
+
+  complete:
+    if: ${{ github.event_name == 'pull_request' && always() }}
+
+    name: 'Complete'
+    runs-on: ubuntu-latest
+    needs: [ lint, build, tests ]
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
+      - name: Success
+        run: echo 'You are soooo curious ;)'
+
+  publish:
+    if: ${{ github.event_name == 'push' }}
+    name: 'Publish to npm'
+
+    runs-on: ubuntu-latest
+    environment: npm
+    needs: [ lint, build, tests ]
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+
+      - uses: actions/download-artifact@v5.0.0
+        with:
+          name: build
+          path: dist
+
+      - name: Publish
+        # language=Bash
+        run: |
+          name=$(jq -j ".name" package.json)
+          version=$(npm view $name@${{ github.ref_name }} version)
+          
+          if [[ "$version" == "$(jq -j ".version" package.json)" ]]; then
+            echo "::notice::$version already exists in npm registry"
+          else
+            npm publish --access public --tag ${{ github.ref_name }} --provenance
+          fi
+
+  release:
+    if: ${{ github.event_name == 'push' }}
+    name: 'Publish release'
+
+    runs-on: ubuntu-latest
+    needs: [ publish ]
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.1
+
+      - name: Read package.json
+        id: info
+        # language=Bash
+        run: |
+          version=$(jq -j ".version" package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
+          
+          if [[ $version =~ "^[0-9]+\.[0-9]+\.[0-9]-[a-zA-Z]+\.[0-9]+" ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Tag version
+        id: tag
+        # language=Bash
+        run: |
+          echo "::group::git fetch --tags"
+          
+          git fetch --tags
+          
+          echo "::endgroup::"
+          
+          if [[ $(git tag -l $VERSION) == $VERSION ]]; then
+            echo "::notice::git tag $VERSION already exists"
+          else
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+          
+            git tag $VERSION
+            git push --tags
+          
+            echo "notes=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          VERSION: v${{ steps.info.outputs.version }}
+
+      - name: Release notes
+        if: ${{ steps.tag.outputs.notes }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.info.outputs.version }}
+          tag_name: v${{ steps.info.outputs.version }}
+          generate_release_notes: true
+          prerelease: ${{ steps.info.outputs.prerelease }}

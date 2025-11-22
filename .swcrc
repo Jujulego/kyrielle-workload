@@ -1,0 +1,13 @@
+{
+  "jsc": {
+    "target": "esnext",
+    "externalHelpers": true,
+    "parser": {
+      "syntax": "typescript"
+    }
+  },
+  "module": {
+    "type": "es6"
+  },
+  "sourceMaps": true
+}

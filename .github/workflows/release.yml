@@ -1,0 +1,34 @@
+name: 'Release'
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Prepare
+        id: prepare
+        # language=Bash
+        run: |
+          tag=$(echo '${{ github.ref }}' | cut -d / -f 3-)
+          version=$(echo $tag | cut -d _ -f 2)
+          
+          echo "version=$version" >> $GITHUB_OUTPUT
+          
+          if [[ $version =~ "^[0-9]+\.[0-9]+\.[0-9]-[a-zA-Z]+\.[0-9]+" ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.prepare.outputs.version }}
+          generate_release_notes: true
+          prerelease: ${{ steps.prepare.outputs.prerelease }}

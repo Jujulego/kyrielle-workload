@@ -1,0 +1,50 @@
+{
+  "name": "@jujulego/library-tpl",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Julien Capellari <julien.capellari@gmail.com>",
+  "repository": "github:Jujulego/library-tpl",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "clean": "shx rm -r dist",
+    "build": "yarn run build:esm && yarn run build:types",
+    "build:esm": "swc src -d dist --strip-leading-paths",
+    "build:types": "tsc --project tsconfig.build.json",
+    "test": "vitest run",
+    "test:types": "tsc --project tests"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@jujulego/jill": "2.5.2",
+    "@jujulego/vite-plugin-swc": "1.2.1",
+    "@microsoft/eslint-formatter-sarif": "3.1.0",
+    "@swc/cli": "0.7.9",
+    "@swc/core": "1.15.3",
+    "@types/node": "24.10.1",
+    "@vitest/coverage-v8": "4.0.13",
+    "@vitest/eslint-plugin": "1.4.3",
+    "eslint": "9.39.1",
+    "jiti": "2.6.1",
+    "shx": "0.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.47.0",
+    "vite": "7.2.4",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "4.0.13"
+  },
+  "packageManager": "yarn@4.11.0"
+}
