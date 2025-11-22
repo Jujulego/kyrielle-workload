@@ -567,31 +567,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jujulego/library-tpl@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@jujulego/library-tpl@workspace:."
-  dependencies:
-    "@eslint/js": "npm:9.39.1"
-    "@jujulego/jill": "npm:2.5.2"
-    "@jujulego/vite-plugin-swc": "npm:1.2.1"
-    "@microsoft/eslint-formatter-sarif": "npm:3.1.0"
-    "@swc/cli": "npm:0.7.9"
-    "@swc/core": "npm:1.15.3"
-    "@swc/helpers": "npm:^0.5.0"
-    "@types/node": "npm:24.10.1"
-    "@vitest/coverage-v8": "npm:4.0.13"
-    "@vitest/eslint-plugin": "npm:1.4.3"
-    eslint: "npm:9.39.1"
-    jiti: "npm:2.6.1"
-    shx: "npm:0.4.0"
-    typescript: "npm:5.9.3"
-    typescript-eslint: "npm:8.47.0"
-    vite: "npm:7.2.4"
-    vite-tsconfig-paths: "npm:5.1.4"
-    vitest: "npm:4.0.13"
-  languageName: unknown
-  linkType: soft
-
 "@jujulego/logger@npm:^0.2.2, @jujulego/logger@npm:^0.2.4":
   version: 0.2.4
   resolution: "@jujulego/logger@npm:0.2.4"
@@ -655,6 +630,31 @@ __metadata:
   checksum: 10c0/9a6e5806bbecedb55b88860977b13a2e4e6e914018912375c9221672d5235d6200090f6a657f4cf9c6636419f9993923c71ec802ada1b56f5309721214ca5390
   languageName: node
   linkType: hard
+
+"@kyrielle/workload@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@kyrielle/workload@workspace:."
+  dependencies:
+    "@eslint/js": "npm:9.39.1"
+    "@jujulego/jill": "npm:2.5.2"
+    "@jujulego/vite-plugin-swc": "npm:1.2.1"
+    "@microsoft/eslint-formatter-sarif": "npm:3.1.0"
+    "@swc/cli": "npm:0.7.9"
+    "@swc/core": "npm:1.15.3"
+    "@swc/helpers": "npm:^0.5.0"
+    "@types/node": "npm:24.10.1"
+    "@vitest/coverage-v8": "npm:4.0.13"
+    "@vitest/eslint-plugin": "npm:1.4.3"
+    eslint: "npm:9.39.1"
+    jiti: "npm:2.6.1"
+    shx: "npm:0.4.0"
+    typescript: "npm:5.9.3"
+    typescript-eslint: "npm:8.47.0"
+    vite: "npm:7.2.4"
+    vite-tsconfig-paths: "npm:5.1.4"
+    vitest: "npm:4.0.13"
+  languageName: unknown
+  linkType: soft
 
 "@microsoft/eslint-formatter-sarif@npm:3.1.0":
   version: 3.1.0

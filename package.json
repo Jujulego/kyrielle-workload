@@ -1,9 +1,9 @@
 {
-  "name": "@jujulego/library-tpl",
+  "name": "@kyrielle/workload",
   "version": "0.0.1",
   "license": "MIT",
   "author": "Julien Capellari <julien.capellari@gmail.com>",
-  "repository": "github:Jujulego/library-tpl",
+  "repository": "github:Jujulego/kyrielle-workload",
   "sideEffects": false,
   "files": [
     "dist"
