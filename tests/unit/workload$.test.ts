@@ -4,7 +4,7 @@ import { once$, source$, var$, waitFor$ } from 'kyrielle';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mocks
-vi.mock('@/src/utils/workload-duration$.js');
+vi.mock('@/src/utils/stopwatch$.js');
 
 // Setup
 beforeEach(() => {
