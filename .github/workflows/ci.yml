@@ -69,8 +69,8 @@ jobs:
           sarif_file: eslint-results.sarif
           wait-for-processing: true
 
-  tests:
-    name: 'Tests'
+  unit-tests:
+    name: 'Unit Tests'
     runs-on: ubuntu-latest
 
     permissions:
@@ -89,11 +89,11 @@ jobs:
       - name: Install
         run: yarn install --immutable
 
-      - name: Run tests
-        run: yarn test --coverage
-
       - name: Check tests typings
         run: yarn test:types
+
+      - name: Run tests
+        run: yarn test:unit --coverage
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
@@ -109,31 +109,77 @@ jobs:
           flags: unit
           use_oidc: true
 
+  tests:
+    name: 'Tests'
+    runs-on: ubuntu-latest
+    needs: [ unit-tests ]
+
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20.x', '22.x', '24.x']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.0
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn test:integration --coverage
+
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          flags: node-${{ matrix.node }}
+          use_oidc: true
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: junit-report.xml
+          flags: node-${{ matrix.node }}
+          use_oidc: true
+
   complete:
     if: ${{ github.event_name == 'pull_request' && always() }}
 
     name: 'Complete'
     runs-on: ubuntu-latest
-    needs: [ lint, build, tests ]
+    needs: [ lint, build, unit-tests, tests ]
 
     permissions:
       contents: read
 
     steps:
-      - name: Failed
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        run: exit 1
-
-      - name: Success
-        run: echo 'You are soooo curious ;)'
+      # language=Bash
+      - run: |
+          if $(echo $RESULTS | jq -j 'any(.!="success")'); then
+            echo '::error:Some required checks failed';
+            exit 1;
+          fi
+        env:
+          RESULTS: ${{ toJson(needs.*.result) }}
 
   publish:
     if: ${{ github.event_name == 'push' }}
-    name: 'Publish to npm'
 
-    runs-on: ubuntu-latest
+    name: 'Publish to npm'
     environment: npm
-    needs: [ lint, build, tests ]
+    runs-on: ubuntu-latest
+    needs: [ lint, build, unit-tests, tests ]
     
     permissions:
       contents: read
@@ -168,8 +214,8 @@ jobs:
 
   release:
     if: ${{ github.event_name == 'push' }}
-    name: 'Publish release'
 
+    name: 'Publish release'
     runs-on: ubuntu-latest
     needs: [ publish ]
 
