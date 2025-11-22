@@ -22,7 +22,7 @@ beforeEach(() => {
 // Tests
 describe('spawn$', () => {
   it('should call job$', () => {
-    const job = spawn$('echo', ['Hello World!'], { cwd: '/test', weight: 2 });
+    const job = spawn$('echo Hello World!', { cwd: '/test', weight: 2 });
 
     expect(job$).toHaveBeenCalledWith({
       label: 'echo Hello World!',
@@ -32,13 +32,12 @@ describe('spawn$', () => {
     });
 
     expect(job.exitCode()).toBeNull();
-    expect(job.cmd).toBe('echo');
-    expect(job.args).toEqual(['Hello World!']);
+    expect(job.cmd).toBe('echo Hello World!');
     expect(job.cwd).toBe('/test');
   });
 
   it('should close streams once job completes', () => {
-    const job = spawn$('echo', ['Hello World!'], { cwd: '/test', weight: 2 });
+    const job = spawn$('echo Hello World!', { cwd: '/test', weight: 2 });
 
     vi.spyOn(job.stdout as PassThrough, 'end');
     vi.spyOn(job.stderr as PassThrough, 'end');
@@ -55,7 +54,7 @@ describe('spawn$', () => {
     let onStart: (this: void, props: WorkloadOnStartProps) => void;
 
     beforeEach(() => {
-      job = spawn$('echo', ['Hello World!'], { cwd: '/test' });
+      job = spawn$('echo Hello World!', { cwd: '/test' });
 
       onStart = vi.mocked(job$).mock.calls[0]![0].onStart as (this: void, props: WorkloadOnStartProps) => void;
 
@@ -73,8 +72,8 @@ describe('spawn$', () => {
 
       onStart({ scheduler: unscheduler$(), signal: controller.signal, setState: vi.fn() });
 
-      expect(execFile).toHaveBeenCalledWith('echo', ['Hello World!'], {
-        shell: true,
+      expect(execFile).toHaveBeenCalledWith('echo Hello World!', [], {
+        shell: false,
         windowsHide: true,
         signal: controller.signal,
         killSignal: 'SIGTERM',

@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 describe('spawn$', () => {
   it('should spawn process, and track it\'s state', async () => {
     // Initiate
-    const job = spawn$('echo', ['Hello World!']);
+    const job = spawn$('echo Hello World!', { shell: true });
 
     expect(job.state()).toBe(WorkloadState.Ready);
     expect(job.exitCode()).toBeNull();
@@ -27,7 +27,7 @@ describe('spawn$', () => {
 
   it('should spawn failing process', async () => {
     // Initiate
-    const job = spawn$('exit', ['1']);
+    const job = spawn$('exit 1', { shell: true });
 
     expect(job.state()).toBe(WorkloadState.Ready);
     expect(job.exitCode()).toBeNull();
@@ -47,7 +47,7 @@ describe('spawn$', () => {
 
   it('should cancel spawned process', async () => {
     // Initiate
-    const job = spawn$('node', ['-e', '"setTimeout(() => console.log(\'Hello world!\'), 1000)"']);
+    const job = spawn$('node -e "setTimeout(() => console.log(\'Hello world!\'), 1000)"', { shell: true });
 
     expect(job.state()).toBe(WorkloadState.Ready);
     expect(job.exitCode()).toBeNull();
