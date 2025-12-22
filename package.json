@@ -39,7 +39,7 @@
     "@swc/core": "1.15.7",
     "@types/node": "24.10.4",
     "@vitest/coverage-v8": "4.0.16",
-    "@vitest/eslint-plugin": "1.5.4",
+    "@vitest/eslint-plugin": "1.6.1",
     "eslint": "9.39.2",
     "jiti": "2.6.1",
     "shx": "0.4.0",
