@@ -96,7 +96,7 @@ jobs:
         run: yarn test:unit --coverage
 
       - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           flags: unit
           use_oidc: true
@@ -140,7 +140,7 @@ jobs:
         run: yarn test:integration --coverage
 
       - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           flags: node-${{ matrix.node }}
           use_oidc: true
